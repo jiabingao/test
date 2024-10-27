@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验导航页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #2d2d2d;
+            color: #ffffff;
+            margin: 0;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .navbar {
+            display: flex;
+            gap: 10px;
+        }
+        .navbar button {
+            background-color: #444;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .navbar button:hover {
+            background-color: #00ff88;
+            color: #222;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>实验导航页面</h1>
+
+    <!-- 导航栏 -->
+    <div class="navbar">
+        <button onclick="window.location.href='实验.html'">Algorithm Principle</button>
+        <button onclick="window.location.href='实验2.html'">Integrated Effect</button>
+        <button onclick="window.location.href='实验3.html'">Object Detection</button>
+        
+    </div>
+
+</body>
+</html>

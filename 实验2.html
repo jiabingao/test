@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能车动态检测与跟踪模拟</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #2d2d2d;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            background: #333;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="1000" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // 定义“车辆”类
+        class Car {
+            constructor(id, x, y, vx) {
+                this.id = id;
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.width = 60;
+                this.height = 30;
+                this.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+                this.laneChangeSpeed = (Math.random() - 0.5) * 0.5; // Y方向变道速度
+            }
+
+            // 更新车辆位置
+            update() {
+                this.x += this.vx;
+                this.y += this.laneChangeSpeed;
+                if (this.y < 100 || this.y > canvas.height - 100) {
+                    this.laneChangeSpeed *= -1;
+                }
+                if (this.x > canvas.width) this.x = -this.width;  // 环绕效果
+            }
+
+            // 绘制车辆
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.fillStyle = "#fff";
+                ctx.font = "12px Arial";
+                ctx.fillText(`ID: ${this.id}`, this.x + 5, this.y + 20);
+
+                // 检测边框
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.x - 5, this.y - 5, this.width + 10, this.height + 10);
+            }
+
+            // 显示距离、速度和角度
+            showInfo(distance, speed, angle) {
+                ctx.fillStyle = "#fff";
+                ctx.font = "12px Arial";
+                ctx.fillText(`距离: ${distance}m`, this.x, this.y - 20);
+                ctx.fillText(`速度: ${speed} m/s`, this.x, this.y - 35);
+                ctx.fillText(`角度: ${angle}°`, this.x, this.y - 50);
+            }
+        }
+
+        // 定义“智能车”类
+        class SmartCar {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = 80;
+                this.height = 40;
+                this.color = '#00FF00';
+                this.detectionRadius = 200; // 检测半径
+                this.vx = 1.5; // 智能车速度
+            }
+
+            // 更新智能车位置
+            update() {
+                this.x += this.vx;
+                if (this.x > canvas.width) this.x = -this.width;
+            }
+
+            // 绘制智能车
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.fillStyle = "#fff";
+                ctx.font = "14px Arial";
+                ctx.fillText("智能车", this.x + 10, this.y + 25);
+
+                // 绘制检测范围
+                ctx.strokeStyle = 'rgba(0, 255, 0, 0.3)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.detectionRadius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // 检测并显示附近车辆信息
+            detectNearbyCars(cars) {
+                cars.forEach(car => {
+                    const dx = (car.x + car.width / 2) - (this.x + this.width / 2);
+                    const dy = (car.y + car.height / 2) - (this.y + this.height / 2);
+                    const distance = Math.sqrt(dx * dx + dy * dy).toFixed(1);
+                    
+                    // 计算相对角度
+                    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                    const relativeAngle = ((angle + 360) % 360).toFixed(1);
+
+                    // 如果车辆在检测范围内
+                    if (distance < this.detectionRadius) {
+                        car.showInfo(distance, Math.abs(car.vx).toFixed(1), relativeAngle);  // 显示距离、速度、角度
+                        // 高亮检测范围内的车辆
+                        ctx.strokeStyle = 'yellow';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(car.x - 5, car.y - 5, car.width + 10, car.height + 10);
+                    }
+                });
+            }
+        }
+
+        // 绘制横向车道线
+        function drawLaneLines() {
+            ctx.strokeStyle = '#FFF';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([20, 15]); // 设置虚线样式
+
+            const laneY1 = canvas.height / 4;
+            const laneY2 = (canvas.height / 4) * 3;
+
+            // 顶部车道线
+            ctx.beginPath();
+            ctx.moveTo(0, laneY1);
+            ctx.lineTo(canvas.width, laneY1);
+            ctx.stroke();
+
+            // 底部车道线
+            ctx.beginPath();
+            ctx.moveTo(0, laneY2);
+            ctx.lineTo(canvas.width, laneY2);
+            ctx.stroke();
+
+            ctx.setLineDash([]); // 重置虚线样式
+        }
+
+        // 创建多辆车和智能车
+        let cars = [];
+        for (let i = 0; i < 5; i++) {
+            const x = Math.random() * canvas.width;
+            const y = 150 + i * 80;
+            const vx = 1 + Math.random() * 2;
+            cars.push(new Car(i + 1, x, y, vx));
+        }
+        const smartCar = new SmartCar(450, canvas.height / 2 - 20);
+
+        // 动画帧更新
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制横向车道线
+            drawLaneLines();
+
+            // 更新和绘制每辆车
+            cars.forEach(car => {
+                car.update();
+                car.draw();
+            });
+
+            // 更新智能车位置并绘制检测范围
+            smartCar.update();
+            smartCar.draw();
+            smartCar.detectNearbyCars(cars);
+
+            requestAnimationFrame(animate); // 循环更新动画
+        }
+
+        animate(); // 启动动画
+    </script>
+</body>
+</html>

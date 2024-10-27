@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithm Dynamic Demo with Lane Lines</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f7f7f7;
+      font-family: Arial, sans-serif;
+    }
+    #canvas {
+      border: 1px solid #ccc;
+      background-color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas" width="800" height="600"></canvas>
+
+<script>
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+
+  let step = 1;
+  let progress = 0;
+
+  // Initialize intervals for smooth animation
+  setInterval(() => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawLaneLines();
+    switch (step) {
+      case 1: drawImageSegmentation(); break;
+      case 2: drawPointCloudProjection(); break;
+      case 3: drawInstanceMatching(); break;
+      case 4: drawContourFitting(); break;
+      case 5: drawMultiObjectTracking(); break;
+    }
+    drawCar(progress);
+    progress += 1;
+    if (progress >= 100) {
+      progress = 0;
+      step = step < 5 ? step + 1 : 1;
+    }
+  }, 50);
+
+  // Draw Lane Lines
+  function drawLaneLines() {
+    ctx.strokeStyle = "#cccccc";
+    ctx.lineWidth = 4;
+    ctx.setLineDash([20, 15]);
+    ctx.beginPath();
+    ctx.moveTo(200, 100);
+    ctx.lineTo(200, 500);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(400, 100);
+    ctx.lineTo(400, 500);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(600, 100);
+    ctx.lineTo(600, 500);
+    ctx.stroke();
+    ctx.setLineDash([]); // Reset dashed line
+  }
+
+  // Step 1: Image Instance Segmentation
+  function drawImageSegmentation() {
+    ctx.fillStyle = "#ddeeff";
+    ctx.fillRect(100, 100, 600, 400);
+    ctx.strokeStyle = "#3366cc";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(100 + progress * 2, 150, 100, 100);
+    ctx.strokeRect(400 - progress * 2, 300, 100, 100);
+
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#3366cc";
+    ctx.fillText("Step 1: Image Segmentation", 300, 80);
+    ctx.fillText("YOLACT identifies objects with masks.", 240, 550);
+  }
+
+  // Step 2: Point Cloud Projection
+  function drawPointCloudProjection() {
+    ctx.fillStyle = "#ddeeff";
+    ctx.fillRect(100, 100, 600, 400);
+
+    ctx.fillStyle = "#3366cc";
+    for (let i = 0; i < 100; i++) {
+      let x = 100 + Math.random() * progress * 2;
+      let y = 100 + Math.random() * progress * 2;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#3366cc";
+    ctx.fillText("Step 2: Point Cloud Projection", 280, 80);
+    ctx.fillText("Align 3D point cloud with the image plane.", 230, 550);
+  }
+
+  // Step 3: Instance Matching & Noise Removal
+  function drawInstanceMatching() {
+    ctx.fillStyle = "#ddeeff";
+    ctx.fillRect(100, 100, 600, 400);
+
+    ctx.fillStyle = "#888888";
+    for (let i = 0; i < 100; i++) {
+      let x = 100 + Math.random() * 600;
+      let y = 100 + Math.random() * 400;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = "#3366cc";
+    for (let i = 0; i < 50; i++) {
+      let x = 200 + Math.random() * progress * 3;
+      let y = 200 + Math.random() * progress * 3;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#3366cc";
+    ctx.fillText("Step 3: Matching & Noise Removal", 260, 80);
+    ctx.fillText("Filter and remove noise with DBSCAN.", 260, 550);
+  }
+
+  // Step 4: 3D Contour Fitting
+  function drawContourFitting() {
+    ctx.fillStyle = "#ddeeff";
+    ctx.fillRect(100, 100, 600, 400);
+
+    ctx.strokeStyle = "#ff3333";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(150 + progress, 200);
+    ctx.lineTo(250 + progress, 150);
+    ctx.lineTo(350 + progress, 250);
+    ctx.lineTo(300 + progress, 350);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#ff3333";
+    ctx.fillText("Step 4: 3D Contour Fitting", 300, 80);
+    ctx.fillText("Create boundary boxes with convex hull.", 230, 550);
+  }
+
+  // Step 5: Multi-Object Tracking
+  function drawMultiObjectTracking() {
+    ctx.fillStyle = "#ddeeff";
+    ctx.fillRect(100, 100, 600, 400);
+
+    ctx.fillStyle = "#3366cc";
+    let x = 200 + (progress % 50) * 10;
+    let y = 200 + (progress % 50) * 5;
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "#ff9933";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x - 10, y - 10);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#3366cc";
+    ctx.fillText("Step 5: Multi-Object Tracking", 280, 80);
+    ctx.fillText("Track each object using Kalman filter.", 240, 550);
+  }
+
+  // Draw Car on Lane Lines
+  function drawCar(progress) {
+    ctx.fillStyle = "#ff0000";
+    let carX = 300 + (progress % 100) * 4;
+    let carY = 450;
+    ctx.fillRect(carX, carY, 50, 30);
+
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(carX + 5, carY + 25, 10, 10);
+    ctx.fillRect(carX + 35, carY + 25, 10, 10);
+  }
+</script>
+
+</body>
+</html>

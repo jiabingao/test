@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能车融合检测演示</title>
+    <style>
+        body {
+            display: flex;
+            background: #2d2d2d;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            width: 100vw;
+            height: 100vh;
+        }
+        .steps {
+            width: 70%;
+            padding: 20px;
+        }
+        .step {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: #333;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        .step.visible {
+            opacity: 1;
+        }
+        .step h3 {
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+        .step canvas {
+            background: #111;
+            border: 1px solid #666;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .summary {
+            width: 30%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .summary h2 {
+            color: #00ff88;
+        }
+        .final-effect {
+            width: 100%;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 左侧步骤展示 -->
+    <div class="steps">
+        <div class="step" id="step1">
+            <h3>步骤 1：图像实例分割</h3>
+            <p>使用 YOLACT 实时分割网络对图像进行实例分割，识别出物体类别和位置。</p>
+            <canvas id="canvas1" width="400" height="200"></canvas>
+        </div>
+
+        <div class="step" id="step2">
+            <h3>步骤 2：点云透视投影</h3>
+            <p>将点云数据投影到图像平面，实现图像与点云的对齐。</p>
+            <canvas id="canvas2" width="400" height="200"></canvas>
+        </div>
+
+        <div class="step" id="step3">
+            <h3>步骤 3：实例匹配和噪声去除</h3>
+            <p>利用图像掩膜筛选出投影点云目标，通过 DBSCAN 算法去除噪声。</p>
+            <canvas id="canvas3" width="400" height="200"></canvas>
+        </div>
+
+        <div class="step" id="step4">
+            <h3>步骤 4：三维轮廓拟合</h3>
+            <p>生成去噪点云的三维轮廓框，展示精确拟合的目标轮廓。</p>
+            <canvas id="canvas4" width="400" height="200"></canvas>
+        </div>
+
+        <div class="step" id="step5">
+            <h3>步骤 5：多目标跟踪</h3>
+            <p>引入“跟踪门”和卡尔曼滤波，对多目标进行平滑跟踪。</p>
+            <canvas id="canvas5" width="400" height="200"></canvas>
+        </div>
+
+        <div class="step" id="step6">
+            <h3>步骤 6：实验验证</h3>
+            <p>展示算法在单目标和多目标环境中的检测精度和可靠性。</p>
+            <canvas id="canvas6" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- 右侧总效果展示 -->
+    <div class="summary">
+        <h2>融合检测总效果</h2>
+        <canvas class="final-effect" id="finalCanvas" width="400" height="400"></canvas>
+        <p>融合检测算法结合了图像的语义信息和点云的空间信息，提升检测精度和环境理解。</p>
+    </div>
+</div>
+
+<script>
+    // 步骤展示函数
+    function drawStep1(canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'lightblue';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#222';
+        ctx.font = '20px Arial';
+        ctx.fillText('原始图像', 10, 30);
+
+        // 动态生成分割掩膜
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
+        ctx.fillRect(50, 50, 100, 100);
+        ctx.fillText('目标 A', 55, 90);
+    }
+
+    function drawStep2(canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'lightblue';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#222';
+        ctx.font = '20px Arial';
+        ctx.fillText('点云投影', 10, 30);
+
+        // 模拟点云投影效果
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        for (let i = 0; i < 200; i++) {
+            ctx.beginPath();
+            ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 2, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+    }
+
+    function drawStep3(canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'lightblue';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#222';
+        ctx.font = '20px Arial';
+        ctx.fillText('噪声去除', 10, 30);
+
+        // 模拟噪声去除
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.6)';
+        for (let i = 0; i < 100; i++) {
+            ctx.beginPath();
+            ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 2, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+    }
+
+    function drawStep4(canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'lightblue';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#222';
+        ctx.font = '20px Arial';
+        ctx.fillText('轮廓拟合', 10, 30);
+
+        // 模拟轮廓拟合框
+        ctx.strokeStyle = 'green';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(50, 50, 100, 100);
+    }
+
+    function drawFinalCanvas(canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'lightblue';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#222';
+        ctx.font = '18px Arial';
+        ctx.fillText('最终融合检测效果', 20, 30);
+
+        // 模拟融合后的场景
+        ctx.fillStyle = 'rgba(0, 255, 0, 0.4)';
+        ctx.fillRect(50, 50, 100, 100);
+        ctx.fillStyle = '#fff';
+        ctx.fillText('检测对象 A', 60, 80);
+    }
+
+    // 动态执行每个步骤的函数
+    function showStep(stepId, drawFunction) {
+        const stepElement = document.getElementById(stepId);
+        const canvas = stepElement.querySelector('canvas');
+        drawFunction(canvas);
+        stepElement.classList.add('visible');
+    }
+
+    // 执行步骤展示
+    function executeSteps() {
+        setTimeout(() => showStep('step1', drawStep1), 1000);
+        setTimeout(() => showStep('step2', drawStep2), 3000);
+        setTimeout(() => showStep('step3', drawStep3), 5000);
+        setTimeout(() => showStep('step4', drawStep4), 7000);
+        setTimeout(() => drawFinalCanvas(document.getElementById('finalCanvas')), 9000);
+    }
+
+    // 初始化
+    executeSteps();
+</script>
+
+</body>
+</html>
